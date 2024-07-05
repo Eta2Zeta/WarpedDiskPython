@@ -1,0 +1,1 @@
+HARDL = 3.0e38 #Total hard emission luminosity
