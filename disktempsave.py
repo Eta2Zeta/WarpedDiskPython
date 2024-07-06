@@ -38,12 +38,10 @@ def disktempsave(bdir):
     
     params = [rin, rout, tiltin, tiltout, phsoff]
     
-    instar = np.zeros(nang)  # Array to hold the pulse profiles
-
     # Generate the beam
-    thbeam, phbeam, nbeam, xv2, yv2, zv2 = beam(nth, nphi, long1, lat1, sigma1, th1, norm1, long2, lat2, sigma2, th2, norm2, 0)
+    thbeam, phbeam, nbeam= beam(nth, nphi, long1, lat1, sigma1, th1, norm1, long2, lat2, sigma2, th2, norm2, 0)
     
-    # Save the beam parameters
+    # Save the beam parameters #~ It seems like that this is used very few times and only the parameter thbeam was used
     beam_params_path = os.path.join(bdir, 'diskbeam.npz')
     np.savez(beam_params_path, nth=nth, nphi=nphi, long1=long1, lat1=lat1, long2=long2, lat2=lat2,
              sigma1=sigma1, sigma2=sigma2, th1=th1, th2=th2, norm1=norm1, norm2=norm2, 

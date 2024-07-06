@@ -33,12 +33,11 @@ def beam(nth, nphi, long1, lat1, sigma1, th1, norm1, long2, lat2, sigma2, th2, n
     :param floor: Minimum value of the beam pattern
     :return: Normalized beam pattern, color scaled beam pattern, and transformed coordinates
     """
-    ctop = 255  # Maximum value for color scaling
-
+    
     # Create theta and phi angle vectors
     vth = -np.pi/2 + np.linspace(0, np.pi, nth)
     vphi = np.linspace(0, 2*np.pi, nphi) + 0.0001 * 2 * np.pi
-    #? Why is it adding the 0.0001 * 2 * np.pi? 
+    #? Why is it adding the 0.0001 * 2 * np.pi? To avoide division by 0
 
     # Calculate the solid angle covered by each point
     thstep = np.pi / (nth - 1)
@@ -71,24 +70,8 @@ def beam(nth, nphi, long1, lat1, sigma1, th1, norm1, long2, lat2, sigma2, th2, n
     nbeam = beam / beamint
 
     # Verify the normalization of the beam pattern
-    nbeamint = 0
-    for i in range(nth):
-        nbeamint += np.sum(nbeam[i, :] * sang[i])
-
-    # Scale the normalized beam pattern for plotting
-    clrbeam = nbeam * ctop / np.max(nbeam)
-
-    rv = 1  # Radius vector for plotting
-
-    # Initialize vectors for plotting the beam pattern
-    xv = np.copy(beam)
-    yv = np.copy(beam)
-    zv = np.copy(beam)
-
-    # Calculate the x, y, and z coordinates for plotting the beam pattern
-    for i in range(nth):
-        xv[i, :] = rv * np.cos(vphi) * np.cos(vth[i])
-        yv[i, :] = rv * np.sin(vphi) * np.cos(vth[i])
-        zv[i, :] = rv * np.sin(vth[i])
+    # nbeamint = 0
+    # for i in range(nth):
+    #     nbeamint += np.sum(nbeam[i, :] * sang[i])
 
     return vth, vphi, nbeam
