@@ -4,6 +4,7 @@ from matplotlib.colors import Normalize
 import matplotlib.cm as cm
 from scipy.constants import k
 from maskit import maskit
+from bbfrac import *
 
 def cross_product(v1, v2):
     """Calculate the cross product of two vectors."""
@@ -17,15 +18,11 @@ def bbfrac_inp(logT, bbfracv, T):
     """Placeholder for the bbfrac_inp function."""
     return np.interp(T, logT, bbfracv)
 
-def bbnorm(T, energ):
-    """Placeholder for the bbnorm function."""
-    return np.exp(-energ / (k * T))
-
 def dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, phio, obselev, fast, diskv, diskvf, plot):
     """
     Take a disk with a given temperature profile and calculate the emission seen by the observer.
+    RCH 7/04
     """
-    cdist = 1.0
 
     # This is the new phi array, rotated by phio
     phf = ph - phio
@@ -44,15 +41,15 @@ def dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, phio, obselev, fast, dis
     intens = np.zeros((nang, nprof))
 
     # Array to hold the energy and spectral info
+    # We will define the energies in keV, but will use erg in the calculation (in bbnorm)
     enbins = 1000
-    emin = 0.001
+    emin = 0.001 
     emax = 100.0
     keV = 1.6021E-9
 
     Tclrmin = 100.0
     Tclrmax = 255.0
     clrdisk = 'k'
-
 
     for i in range(nang):
         # Rotate with respect to phi
@@ -81,14 +78,15 @@ def dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, phio, obselev, fast, dis
     norm = Normalize(vmin=Tclrmin, vmax=Tclrmax)
     cmap = plt.get_cmap('viridis')  
 
-
     if diskv == 'y':
         top = np.zeros((nang, nprof), dtype=int)
 
         for i in range(nang):
+            # Handling edge cases for the first and last elements
             inds = [i-1, i+1] if i not in [0, nang-1] else ([nang-1, 1] if i == 0 else [nang-2, 0])
 
             for j in range(nprof):
+                # Finding the bounds in angle of this piece of the disk
                 jnds = [j-1, j+1] if j not in [0, nprof-1] else ([0, 1] if j == 0 else [nprof-2, nprof-1])
 
                 vec1 = np.array([xv2[i, jnds[1]] - xv2[i, jnds[0]], yv2[i, jnds[1]] - yv2[i, jnds[0]], zv2[i, jnds[1]] - zv2[i, jnds[0]]])
@@ -97,7 +95,7 @@ def dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, phio, obselev, fast, dis
                 orient = cross_product(vec1, vec2)
                 top[i, j] = int(orient[0] / abs(orient[0]))
 
-                # Fractional component of the area pointed toward us
+                # This is the fractional component of the area pointed toward us
                 fsee = abs(orient[0]) / np.sqrt(np.sum(orient**2))
 
                 if fsee < 0.1:
@@ -150,7 +148,8 @@ def dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, phio, obselev, fast, dis
             for j in range(nprof):
                 intens[i, j] = fsee * labs[i, j]
                 if iplot[i, j] + see[i, j] == 2:
-                    spec += intens[i, j] * bbnorm(T[i, j], energ)
+                    bb = bbnorm(T[i, j], energ)
+                    spec += intens[i, j] * bb
 
         xlo = 0.3
         xhi = 0.7
@@ -218,7 +217,7 @@ def dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, phio, obselev, fast, dis
 
         # Plot the star
         plt.plot(0, 0, 'o', color='black')
-        # plt.show()
+        plt.show()
         plt.close()
 
     return intot, intotx, en, spec

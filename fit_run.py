@@ -4,6 +4,7 @@ import subprocess
 from disktempsave import disktempsave  # assuming disktempsave.py is the Python translation of the IDL disktempsave
 from diskspecrest import diskspecrest  # assuming diskspecrest.py is the Python translation of the IDL diskspecrest
 from fitplotprof import fitplotprof  # assuming fitplotprof.py is the Python translation of the IDL fitplotprof
+from fitplotprof_new import fitplotprof_new
 
 def fit_run(topdir):
     """Create input files and process a set of simulated profiles for various configurations."""
@@ -31,3 +32,4 @@ def fit_run(topdir):
 
         # Optionally, plot the results and erase files as needed
         fitplotprof(directory, eraseit='y')
+        # fitplotprof_new(directory, eraseit='y')

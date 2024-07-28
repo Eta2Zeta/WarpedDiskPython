@@ -23,26 +23,33 @@ def listarr(start, stop, num):
     """
     return np.logspace(start, stop, num)
 
-#? 
-def bbnorm(T, energ):
+
+def bbnorm(T, E):
     """
     Calculate the normalized blackbody spectrum.
 
     Parameters:
     T (float): Temperature in Kelvin.
-    energ (numpy array): Array of energies in joules.
+    E (numpy array): Array of energies in ergs.
 
     Returns:
     numpy array: Normalized blackbody spectrum.
     """
-    h = 6.6261e-34  # Planck's constant (J*s)
-    c = 3.0e8       # Speed of light (m/s)
-    k = 1.3806e-23  # Boltzmann's constant (J/K)
+    k = 1.3807e-16  # Boltzmann's constant in erg/K
+    cbb = 3.824     # This is 1/h^3c^2 / 1E57
+    
+    # Calculate blackbody spectrum
+    bbe = 1.e20 * (E**3) / (np.exp(E / (k * T)) - 1.)
+    
+    # Calculate the difference between consecutive elements of E
+    Ebin = np.diff(E)
+    
+    # Integrate the blackbody spectrum
+    bbint = np.sum(bbe[:-1] * Ebin)
+    
+    # Normalize the spectrum
+    bbn = bbe / bbint
 
-    frequencies = energ / h
-    intensity = (2.0 * h * frequencies**3) / (c**2) / (np.exp(h * frequencies / (k * T)) - 1.0)
-
-    return intensity / np.max(intensity)
 
 def bbfrac(enlo, enhi, T):
     """

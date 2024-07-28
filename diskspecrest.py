@@ -59,7 +59,6 @@ def diskspecrest(bdir):
 
     # Plot the disk at various phi angles
     for i in range(nang):
-        load_color_table(3)
 
         print(f'disk angle phi: {strang[i]}')
 
@@ -99,8 +98,6 @@ def diskspecrest(bdir):
             irot = np.argmin(beamoff)
             instar[j] = 4.0 * np.pi * illum[ithobs, irot]
 
-            if paper == 'y' and plot == 'y':
-                psopen(os.path.join(diskphi_dir, f'frame_{j:03d}.eps'))
 
             # Check if the disk viewing information has already been saved
             rdiskf = os.path.exists(diskvf_path)
@@ -114,10 +111,6 @@ def diskspecrest(bdir):
             ang, xv, yv, zv = diskshape(params)  # Assuming the diskshape function is defined
             intot, intotx, en, spec = dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, angc[i], obselev, fast, diskv, diskvf_path, plot)
 
-
-            if paper == 'y' and plot == 'y':
-                psclose()
-
             # Get the pulse profile information
             inrep[j] = intot
             inrepx[j] = intotx
@@ -129,19 +122,3 @@ def diskspecrest(bdir):
         np.savez(os.path.join(diskphi_dir, 'inprof.npz'), inrep=inrep, inrepx=inrepx, instar=instar)
 
     angcinp = angc[i]
-
-def load_color_table(index):
-    """Placeholder function to load a color table."""
-    print(f"Loading color table {index}")
-    # Actual implementation needed to load color table
-
-def psopen(filepath):
-    """Placeholder function to open a PostScript file."""
-    print(f"Opening PostScript file: {filepath}")
-    # Actual implementation needed for creating a PostScript file
-
-def psclose():
-    """Placeholder function to close a PostScript file."""
-    print("Closing PostScript file")
-    # Actual implementation needed for closing a PostScript file
-

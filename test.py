@@ -1,45 +1,54 @@
 import numpy as np
-import time
+import matplotlib.pyplot as plt
 
-# Function to create an .npz file with 100 parameters
-def create_npz_file(file_path):
-    params = {f'param{i}': i for i in range(10)}
-    np.savez(file_path, **params)
+h = 6.6261e-34  # Planck's constant (J*s)
+c = 3.0e8       # Speed of light (m/s)
+k = 1.3806e-23  # Boltzmann's constant (J/K)
 
-# Function 1: Takes individual parameters and prints them
-def function1(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9):
-    print(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9)
+def blackbody_spectrum(wavelength, T):
+    """
+    Calculate the blackbody spectrum using Planck's Law.
 
-# Function 2: Takes a parameters dictionary and prints them
-def function2(params):
-    print(params['param0'], params['param1'], params['param2'], params['param3'], params['param4'],
-          params['param5'], params['param6'], params['param7'], params['param8'], params['param9'])
+    Parameters:
+    wavelength (numpy array): Wavelengths in meters.
+    T (float): Temperature in Kelvin.
 
-def main():
-    loop_times = 10000
-    file_path = 'params.npz'
-    create_npz_file(file_path)
+    Returns:
+    numpy array: Normalized spectral radiance (W/m^3/sr).
+    """
+
     
-    # Load the parameters
-    params_data = np.load(file_path)
     
-    # Extract individual parameters
-    params_list = [params_data[f'param{i}'] for i in range(10)]
+    # Calculate the spectrum at the upper bound wavelength
+    upper_bound_wavelength = wavelength[-1]  # The last element in the wavelength array
+    upper_bound_exponent = (h * c) / (upper_bound_wavelength * k * T)
+    upper_bound_radiance = (2.0 * h * c**2) / (upper_bound_wavelength**5 * (np.expm1(upper_bound_exponent)))
     
-    # Measure time for Function 1
-    start_time = time.time()
-    for _ in range(loop_times):
-        function1(*params_list)
-    end_time = time.time()
-    func1_time = end_time - start_time
-    
-    # Measure time for Function 2
-    start_time = time.time()
-    for _ in range(loop_times):
-        function2(params_data)
-    end_time = time.time()
-    print(f"Function 1 executed in {func1_time:.2f} seconds")
-    print(f"Function 2 executed in {end_time - start_time:.2f} seconds")
 
-if __name__ == "__main__":
-    main()
+    # Planck's Law
+    exponent = (h * c) / (wavelength * k * T)
+    normalized_spectral_radiance = (2.0 * h * c**2) / (wavelength**5 * (np.expm1(exponent)))/upper_bound_radiance
+
+    
+    return normalized_spectral_radiance
+
+# Define the temperature of the Sun
+T_sun = 0.1*1e3*1.6e-19/k  # Temperature in Kelvin
+
+# Define the wavelength range (in meters)
+lower = 1e-11
+upper = 1e-8
+wavelength = np.linspace(lower, upper, 1000)  # 1e-11 to 1e-8 is the wavelength of x-ray
+
+# Calculate the normalized blackbody spectrum
+normalized_spectrum = blackbody_spectrum(wavelength, T_sun)
+
+# Plot the normalized spectrum
+plt.figure(figsize=(10, 6))
+plt.plot(wavelength, normalized_spectrum, color='orange')
+plt.title('Normalized Blackbody Spectrum of the Sun')
+plt.xlabel('Wavelength (m)')
+plt.ylabel('Normalized Spectral Radiance')
+plt.grid(True)
+plt.xscale('log')  # Use logarithmic scale for x-axis
+plt.show()

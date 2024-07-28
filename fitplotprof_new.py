@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import pickle
 
 def fitplotprof_new(bdir, eraseit):
     """
@@ -33,15 +32,14 @@ def fitplotprof_new(bdir, eraseit):
         # print(f'plotting disk angle phi: {strang[i]}')
         # print(f'restoring {bdir}diskphi_{strang[i]}/inprof.pkl')
         
-        with open(os.path.join(bdir, f'diskphi_{strang[i]}', 'inprof.pkl'), 'rb') as f:
-            inprof_data = pickle.load(f)
+        inprof_data = np.load(os.path.join(bdir, f'diskphi_{strang[i]}', 'inprof.npz'))
         
         instar = inprof_data['instar']
         inrepx = inprof_data['inrepx']
 
         # This ERASES the diskvf.pkl file (to save space)
         if eraseit == 'y':
-            os.remove(os.path.join(bdir, f'diskphi_{strang[i]}', 'diskvf.pkl'))
+            os.remove(os.path.join(bdir, f'diskphi_{strang[i]}', 'diskvf.npz'))
 
         ntemps = len(instar)
 
@@ -92,5 +90,8 @@ def fitplotprof_new(bdir, eraseit):
         yreps[:, i] = yrep
 
     # Save the results
-    with open(os.path.join(bdir, 'profs.pkl'), 'wb') as f:
-        pickle.dump({'x': x, 'ystars': ystars, 'yreps': yreps}, f)
+    # with open(os.path.join(bdir, 'profs.pkl'), 'wb') as f:
+    #     pickle.dump({'x': x, 'ystars': ystars, 'yreps': yreps}, f)
+
+if __name__ == "__main__":
+    fitplotprof_new('/path/to/data', eraseit='y')

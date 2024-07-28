@@ -61,7 +61,7 @@ def fitplotprof(bdir, eraseit):
             ax.legend()
     
     plt.tight_layout()
-    # plt.show()
+    plt.show()
     plt.close()
     
     # Save the processed profiles to a .npz file
