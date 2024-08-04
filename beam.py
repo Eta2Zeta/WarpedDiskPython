@@ -32,6 +32,8 @@ def beam(nth, nphi, long1, lat1, sigma1, th1, norm1, long2, lat2, sigma2, th2, n
     :param norm2: Normalization factor for the second beam
     :param floor: Minimum value of the beam pattern
     :return: Normalized beam pattern, color scaled beam pattern, and transformed coordinates
+            The beam pattern is a 2D array with number of phi and number of theta
+            the value of the array is the beam intensity
     """
     
     # Create theta and phi angle vectors

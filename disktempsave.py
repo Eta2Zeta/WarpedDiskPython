@@ -11,6 +11,7 @@ def disktempsave(bdir):
     params_path = os.path.join(bdir, 'par.npz')
     params_data = np.load(params_path)
     
+    # Extract parameters from the loaded data
     rin = params_data['rin']
     rout = params_data['rout']
     tiltin = params_data['tiltin']
@@ -30,36 +31,39 @@ def disktempsave(bdir):
     norm2 = params_data['norm2']
     rinphys = params_data['rinphys']
     lum38 = params_data['lum38']
-
-    # Beam rotation angles
-    nang = 128
+    nang = params_data['nang']
+    
+    # Calculate the step size for angles and create an array of indices representing the beam rotation angles
     istep = nphi / nang
     iang = (np.arange(nang) * istep).astype(int)
     
+    # Parameters for the beam function
     params = [rin, rout, tiltin, tiltout, phsoff]
     
-    # Generate the beam
-    thbeam, phbeam, nbeam= beam(nth, nphi, long1, lat1, sigma1, th1, norm1, long2, lat2, sigma2, th2, norm2, 0)
+    # Generate the beam shape using the provided parameters
+    thbeam, phbeam, nbeam = beam(nth, nphi, long1, lat1, sigma1, th1, norm1, long2, lat2, sigma2, th2, norm2, 0)
     
-    # Save the beam parameters #~ It seems like that this is used very few times and only the parameter thbeam was used
+    # Save the beam parameters and generated beam shape to a file
     beam_params_path = os.path.join(bdir, 'diskbeam.npz')
     np.savez(beam_params_path, nth=nth, nphi=nphi, long1=long1, lat1=lat1, long2=long2, lat2=lat2,
              sigma1=sigma1, sigma2=sigma2, th1=th1, th2=th2, norm1=norm1, norm2=norm2, 
              thbeam=thbeam, phbeam=phbeam, nbeam=nbeam, params=params, rinphys=rinphys, lum38=lum38)
     
-    # Array to hold the emitted luminosities
+    # Initialize an array to hold the emitted luminosities for each angle
     lemitv = np.zeros(nang)
-    
-    j = 0
-    while j < nang:
+
+    # Loop over each angle
+    for j in range(nang):
         ij = iang[j]
-        nbeam2 = np.copy(nbeam)
+        nbeam_copy = np.copy(nbeam)
         
+        # Rotate the beam to the current angle ij
         if ij != 0 and ij != nphi - 1:
-            nbeam2[:, :nphi - ij] = nbeam[:, ij:]
-            nbeam2[:, nphi - ij:] = nbeam[:, :ij]
+            nbeam_copy[:, :nphi - ij] = nbeam[:, ij:]
+            nbeam_copy[:, nphi - ij:] = nbeam[:, :ij]
         
-        illum = nbeam2 * lum38
+        # Calculate the illumination based on the rotated beam
+        illum = nbeam_copy * lum38
 
         # Create a disk and heat it with an isotropic X-ray source
         xv = np.zeros((params_data['npoints'], params_data['nprof']))
@@ -69,20 +73,17 @@ def disktempsave(bdir):
         side = np.zeros((params_data['npoints'], params_data['nprof']), dtype=int)
         lemit = 0.0
         
-        side, T, sang, labs, lemit = disktemp(params_data['npoints'], params_data['nprof'], rinphys, thbeam, phbeam, illum, 
-                 params_data['ph'], xv, yv, zv, T, side, lemit, params_data)
+        # Calculate the disk temperature and other properties
+        side, T, _, labs, lemit = disktemp(params_data['npoints'], params_data['nprof'], rinphys, thbeam, phbeam, illum, 
+                params_data['ph'], xv, yv, zv, T, side, lemit, params_data)
         
-
+        # Save the disk temperature profile and other properties to a file
         dtemp_path = os.path.join(bdir, f'dtemp_{j:03d}.npz')
-        np.savez(dtemp_path, ph=params_data['ph'], illum=illum, xv=xv, yv=yv, zv=zv, labs=labs, T=T, side=side, phbeam = phbeam)
+        np.savez(dtemp_path, ph=params_data['ph'], illum=illum, xv=xv, yv=yv, zv=zv, labs=labs, T=T, side=side, phbeam=phbeam)
         
-        # Put the emitted luminosity in the vector
+        # Store the emitted luminosity for the current angle in the lemitv array
         lemitv[j] = lemit
-        
-        # print(f'phi={phbeam[iang[j]]}')
-        
-        j += 1
     
-    # Save the absorbed luminosity
+    # Save the emitted luminosity vector to a file
     lemit_path = os.path.join(bdir, 'lemit.npz')
     np.savez(lemit_path, lemitv=lemitv)

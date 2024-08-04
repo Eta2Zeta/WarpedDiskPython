@@ -15,8 +15,7 @@ def fitplotprof(bdir, eraseit):
     offsets = np.zeros(nang, dtype=int)
     
     # Set plot margins and configurations
-    l, tb, r = 0.13, 0.18, 0.07
-    fig, axs = plt.subplots(2, 8, figsize=(15, 4), sharex=True, sharey=True)
+    fig, axs = plt.subplots(2, 4, figsize=(15, 8), sharex=True, sharey=True)
     
     for i in range(nang):
         phi_dir = f'diskphi_{ang[i]:.3f}'

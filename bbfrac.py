@@ -36,7 +36,6 @@ def bbnorm(T, E):
     numpy array: Normalized blackbody spectrum.
     """
     k = 1.3807e-16  # Boltzmann's constant in erg/K
-    cbb = 3.824     # This is 1/h^3c^2 / 1E57
     
     # Calculate blackbody spectrum
     bbe = 1.e20 * (E**3) / (np.exp(E / (k * T)) - 1.)
@@ -49,6 +48,9 @@ def bbnorm(T, E):
     
     # Normalize the spectrum
     bbn = bbe / bbint
+
+    return bbn
+
 
 
 def bbfrac(enlo, enhi, T):

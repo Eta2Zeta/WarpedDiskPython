@@ -61,7 +61,7 @@ def fit_inp(topdir='./test/'):
     nphi = npoints
 
     # Beam rotation angles
-    nang = 128
+    nang = 256
     istep = nphi / nang
     iang = np.fix(np.arange(nang) * istep).astype(int)
 

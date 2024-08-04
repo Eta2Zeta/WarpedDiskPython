@@ -1,5 +1,5 @@
 INPUT to warp disk shape (multiple runs): ./test/
-#UTC: 2024-07-11T14:25:34
+#UTC: 2024-08-03T23:14:24
 
 DISK PARAMETERS:
 rin=0.8
@@ -29,7 +29,7 @@ ph=[1.000e-04 1.010e-02 2.010e-02 3.010e-02 4.010e-02 5.010e-02 6.010e-02
 
 obselev=[-5.0]
 BEAM PARAMETERS:
-nang=128
+nang=256
 beam angles 1=[0.0]
 beam angles 2=[60.0]
 long1=0.0

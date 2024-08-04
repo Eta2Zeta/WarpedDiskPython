@@ -5,6 +5,7 @@ import matplotlib.cm as cm
 from scipy.constants import k
 from maskit import maskit
 from bbfrac import *
+from ploting.plot import plot1D
 
 def cross_product(v1, v2):
     """Calculate the cross product of two vectors."""
@@ -72,11 +73,14 @@ def dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, phio, obselev, fast, dis
     ibk = np.where(xout <= 0.0)[0]
     ifr = np.where(xout >= 0.0)[0]
 
+
+    '''Colors'''
     Tclr = (T - Tmin) * (Tclrmax - Tclrmin) / (Tmax - Tmin) + Tclrmin
 
     # Normalize Tclr to the range [0, 1]
     norm = Normalize(vmin=Tclrmin, vmax=Tclrmax)
     cmap = plt.get_cmap('viridis')  
+
 
     if diskv == 'y':
         top = np.zeros((nang, nprof), dtype=int)
@@ -109,7 +113,6 @@ def dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, phio, obselev, fast, dis
 
         # Save the results of the visibility analysis
         np.savez(diskvf, iplot=iplot, see=see, fsee=fsee)
-
     else:
         # Load the results of the visibility analysis
         data = np.load(diskvf)
@@ -120,7 +123,8 @@ def dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, phio, obselev, fast, dis
     # Get the intensity
     intens = fsee * labs
 
-    # Find the total reprocessed intensity
+    # Find the total reprocessed intensity 
+    # By summing all the points that you can see and if (iplot = True)
     intot = np.sum(intens[iplot + see == 2])
 
     # Define the intotx variable
@@ -139,8 +143,10 @@ def dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, phio, obselev, fast, dis
 
     else:
         # Slow version, saves all the spectra
-        loge = np.linspace(np.log10(emin), np.log10(emax), enbins)
-        en = 10**loge
+        
+        #Create an array of energies that is linear in log space
+        en = np.logspace(np.log10(emin), np.log10(emax), enbins) 
+
         energ = en * keV
         spec = np.zeros(enbins)
 
@@ -148,7 +154,9 @@ def dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, phio, obselev, fast, dis
             for j in range(nprof):
                 intens[i, j] = fsee * labs[i, j]
                 if iplot[i, j] + see[i, j] == 2:
+                    # For each point in an angle and profile, calculate the blackbody spectrum there
                     bb = bbnorm(T[i, j], energ)
+                    # The spectrum at the point is equal to the intensity modeled by this blackbody spectrum there
                     spec += intens[i, j] * bb
 
         xlo = 0.3
@@ -179,19 +187,21 @@ def dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, phio, obselev, fast, dis
                     plt.plot(yv2[i, [j, j+1]], zv2[i, [j, j+1]], linestyle=ls, color=color)
 
         # Some werid bug that I don't know how to fix yet
-        # # Fix the front and back indices so the rings come out OK
+        # Fix the front and back indices so the rings come out OK
+        # The problemm is that np.where(np.diff(ifr) != 1) is an empty arra because ifr 
+        # array is all just one apart form each other
         # icutf = np.where(np.diff(ifr) != 1)[0][0]
         # if icutf >= 0:
         #     ifr = np.concatenate((ifr[(icutf+1):], ifr[:icutf+1]))
-        # if yout[ifr[-1]] == yout[ifr[0]]:
-        #     ifr = ifr[:-1]
+        if yout[ifr[-1]] == yout[ifr[0]]:
+            ifr = ifr[:-1]
 
         
         # icutb = np.where(np.diff(ibk) != 1)[0][0]
         # if icutb >= 0:
         #     ibk = np.concatenate((ibk[(icutb+1):], ibk[:icutb+1]))
-        # if yout[ibk[-1]] == yout[ibk[0]]:
-        #     ibk = ibk[:-1]
+        if yout[ibk[-1]] == yout[ibk[0]]:
+            ibk = ibk[:-1]
         
         # Calculate differences and find indices where differences are not 1
         icutf_indices = np.where(np.diff(ifr) != 1)[0]
@@ -217,7 +227,7 @@ def dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, phio, obselev, fast, dis
 
         # Plot the star
         plt.plot(0, 0, 'o', color='black')
-        plt.show()
+        # plt.show()
         plt.close()
 
     return intot, intotx, en, spec
