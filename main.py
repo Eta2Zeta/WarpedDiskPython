@@ -1,5 +1,6 @@
 import time
 from fit_inp import fit_inp
+from input_parameters import input_parameters
 from fit_run import fit_run
 
 def main():
@@ -8,7 +9,8 @@ def main():
     # Start the timer
     start_time = time.time()
     
-    fit_inp(analysis_dir)
+    # fit_inp(analysis_dir)
+    input_parameters(analysis_dir)
     fit_run(analysis_dir)
     
     # Stop the timer

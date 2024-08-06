@@ -10,7 +10,10 @@ def fitplotprof(bdir, eraseit):
         bdir (str): Base directory containing the diskphi data folders.
         eraseit (bool): If True, delete 'diskvf.idl' files after processing.
     """
-    nang = 8
+    params_path = os.path.join(bdir,'par.npz')
+    params = np.load(params_path)
+
+    nang = params['nangtoview']
     ang = np.arange(nang) / nang
     offsets = np.zeros(nang, dtype=int)
     

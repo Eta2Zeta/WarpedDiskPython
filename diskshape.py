@@ -1,6 +1,6 @@
 import numpy as np
 
-def diskshape(params_data):
+def diskshape(npoints, nprof, disk_parameters):
     """
     Calculate the shape of the disk and return the X, Y, and Z values.
     
@@ -9,15 +9,9 @@ def diskshape(params_data):
     :param nprof: Number of profile points
     :return: ang, xv, yv, zv
     """
-    npoints = params_data['npoints']
-    nprof = params_data['nprof']
-
+    
     # Parameters of the disk
-    rin = params_data['rin']
-    rout = params_data['rout']
-    tiltin = params_data['tiltin']
-    tiltout = params_data['tiltout']
-    phsoff = params_data['phsoff']
+    rin, rout, tiltin, tiltout, phsoff = disk_parameters
 
     # Offsets and amplitudes for the disk profile
     off = np.linspace(0, phsoff, nprof)
@@ -31,6 +25,7 @@ def diskshape(params_data):
     # Make the vector of radii
     rv = np.linspace(rin, rout, nprof)
     # rphys = rv * rinphys  #? This is used in disktemp and somehow commented out in the idl code, investigate later
+    #? Seems like it converse the r (random unit) to r (physical unit)
 
     # Find the appropriate values of phase to use
     ph = np.linspace(0, 1, npoints, endpoint=False) + 0.0001  # Avoid division by zero

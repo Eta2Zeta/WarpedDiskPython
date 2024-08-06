@@ -11,7 +11,7 @@ def cross_product(v1, v2):
 
 
 
-def disktemp(npoints, nprof, rinphys, thil, phil, illum, ph, xv, yv, zv, T, side, lemit, params_data):
+def disktemp(npoints, nprof, rinphys, thil, phil, illum, ph, xv, yv, zv, T, side, lemit, disk_parameters):
     """
     Calculate the temperature of the disk given an input radiation field.
     
@@ -36,17 +36,14 @@ def disktemp(npoints, nprof, rinphys, thil, phil, illum, ph, xv, yv, zv, T, side
     kpc242 = 9.523  # kpc^2 in 1E42
     k = 1.3807E-16  # Boltzmann constant in erg/K
     SBsigma = 5.6705E-5  # Stefan-Boltzmann constant in erg/(cm^2 K^4 s)
-    keV = 1.6021E-9  # Energy conversion factor in erg
-
-    ctop = 255.  # The top value for the color index
-
+    
     # Arrays to store side illumination, temperature, solid angle, and energy absorbed
     side = np.zeros((npoints, nprof), dtype=int)
     sang = np.zeros((npoints, nprof))
     labs = np.zeros((npoints, nprof))
 
     # Calculate the shape of the disk
-    ang, xv, yv, zv = diskshape(params_data)
+    ang, xv, yv, zv = diskshape(npoints, nprof, disk_parameters)
 
     # Assume constant steps in phi
     phistep = np.full(npoints, ph[1] - ph[0])

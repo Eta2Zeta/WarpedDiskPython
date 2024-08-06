@@ -10,8 +10,18 @@ def diskspecrest(bdir):
     params_path = os.path.join(bdir, 'par.npz')
     params = np.load(params_path)
 
+    npoints = params['npoints']
+    nprofs = params['nprof']
 
-    nangtoview = 8
+    rin = params['rin']
+    rout = params['rout']
+    tiltin = params['tiltin']
+    tiltout = params['tiltout']
+    phsoff = params['phsoff']
+
+    disk_parameters = [rin,rout,tiltin,tiltout,phsoff]
+    
+    nangtoview = 2
     ang = np.arange(nangtoview) / nangtoview
     plot = 'n'
     fast = 'n'
@@ -106,7 +116,7 @@ def diskspecrest(bdir):
                 diskv = 'n'
 
             # Calculate the observed view of the disk
-            ang, xv, yv, zv = diskshape(params)  # Assuming the diskshape function is defined
+            ang, xv, yv, zv = diskshape(npoints, nprofs, disk_parameters)  # Assuming the diskshape function is defined
             intot, intotx, en, spec = dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, angc[i], obselev, fast, diskv, diskvf_path, plot)
 
             # Get the pulse profile information

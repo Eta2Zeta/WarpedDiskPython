@@ -15,9 +15,6 @@ def cross_product(v1, v2):
         v1[0] * v2[1] - v1[1] * v2[0]
     ])
 
-def bbfrac_inp(logT, bbfracv, T):
-    """Placeholder for the bbfrac_inp function."""
-    return np.interp(T, logT, bbfracv)
 
 def dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, phio, obselev, fast, diskv, diskvf, plot):
     """
@@ -227,7 +224,7 @@ def dtmpspec(xv, yv, zv, labs, T, Tmax, Tmin, side, ph, phio, obselev, fast, dis
 
         # Plot the star
         plt.plot(0, 0, 'o', color='black')
-        # plt.show()
+        plt.show()
         plt.close()
 
     return intot, intotx, en, spec

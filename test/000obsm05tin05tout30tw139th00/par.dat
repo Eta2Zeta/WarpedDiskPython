@@ -1,12 +1,12 @@
-INPUT to warp disk shape (multiple runs): ./test/
+INPUT to warp disk shape: ./test/000obsm05tin05tout30tw139th00
 #UTC: 2024-08-05T00:26:29
 
 DISK PARAMETERS:
 rin=0.8
 rout=1.0
-tiltin=[5.0]
-tiltout=[30.0]
-phsoff=[139.0]
+tiltin=0.08726646259971647
+tiltout=0.5235987755982988
+phsoff=2.426007660272118
 npoints=100
 nprof=100
 nth=100
@@ -27,7 +27,6 @@ ph=[1.000e-04 1.010e-02 2.010e-02 3.010e-02 4.010e-02 5.010e-02 6.010e-02
  9.101e-01 9.201e-01 9.301e-01 9.401e-01 9.501e-01 9.601e-01 9.701e-01
  9.801e-01 9.901e-01]
 
-obselev=[-5.0]
 BEAM PARAMETERS:
 nang=128
 beam_1_long=0.0
@@ -43,4 +42,5 @@ beam_2_norm=3.0
 floor=1.0
 rinphys=100000000.0
 lum38=3.0
+obselev=-0.08726646259971647
 nangtoview=2

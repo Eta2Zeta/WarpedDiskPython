@@ -1,8 +1,8 @@
 import numpy as np
 import os
-from beam import beam_luminosity, Beam
+from beam import beam  # Import the beam function from the beam module
+from beam import beam_luminosity
 from disktemp import disktemp  # Import the disktemp function from the disktemp module
-from ploting.plt_beam import plot_beam_3D
 import time
 
 def disktempsave(bdir):
@@ -13,9 +13,6 @@ def disktempsave(bdir):
     # Load parameters from the file
     params_path = os.path.join(bdir, 'par.npz')
     params_data = np.load(params_path)
-
-    npoints = params_data['npoints']
-    nprofs = params_data['nprof']
     
     # Extract parameters from the loaded data
     rin = params_data['rin']
@@ -24,34 +21,29 @@ def disktempsave(bdir):
     tiltout = params_data['tiltout']
     phsoff = params_data['phsoff']
     nphi_beam = params_data['nphi']
-    nth_beam = params_data['nth']
+    nth = params_data['nth']
+    long1 = params_data['long1']
+    lat1 = params_data['lat1']
+    sigma1 = params_data['sigma1']
+    th1 = params_data['th1']
+    norm1 = params_data['norm1']
+    long2 = params_data['long2']
+    lat2 = params_data['lat2']
+    sigma2 = params_data['sigma2']
+    th2 = params_data['th2']
+    norm2 = params_data['norm2']
     rinphys = params_data['rinphys']
     lum38 = params_data['lum38']
     nang = params_data['nang']
-
-    disk_parameters = [rin,rout,tiltin,tiltout,phsoff]
-
-    # Extract multiple beam parameters
-    beams = []
-    for key in params_data:
-        if key.startswith('beam_'):
-            idx = int(key.split('_')[1])
-            if len(beams) < idx:
-                beams.append({})
-            param_type = key.split('_')[2]
-            beams[idx - 1][param_type] = params_data[key]
-
+    
+    # Parameters for the beam function
+    params = [rin, rout, tiltin, tiltout, phsoff]
+    
     print("Generating the beam shape...")
     # Start timing the beam generation
     start_time = time.time()
-
-    # Convert beam dictionaries to Beam objects
-    beam_objects = [Beam(**beam) for beam in beams]
     # Generate the beam shape using the provided parameters
-    thbeam, phbeam, nlum = beam_luminosity(nth_beam, nphi_beam, beam_objects, 0)
-
-    # plot_beam_3D(nphi_beam, nth_beam, thbeam, phbeam, nlum)
-
+    thbeam, phbeam, nbeam = beam(nth, nphi_beam, long1, lat1, sigma1, th1, norm1, long2, lat2, sigma2, th2, norm2, 0)
     # End timing the beam generation
     end_time = time.time()
     print(f"Beam generation took {end_time - start_time:.2f} seconds.")
@@ -59,8 +51,9 @@ def disktempsave(bdir):
     print("Saving beam parameters to diskbeam.npz...")
     # Save the beam parameters and generated beam shape to a file
     beam_params_path = os.path.join(bdir, 'diskbeam.npz')
-    np.savez(beam_params_path, nth=nth_beam, nphi=nphi_beam, beams=beams, thbeam=thbeam, phbeam=phbeam, nlum=nlum, 
-             rinphys=rinphys, lum38=lum38)
+    np.savez(beam_params_path, nth=nth, nphi=nphi_beam, long1=long1, lat1=lat1, long2=long2, lat2=lat2,
+             sigma1=sigma1, sigma2=sigma2, th1=th1, th2=th2, norm1=norm1, norm2=norm2, 
+             thbeam=thbeam, phbeam=phbeam, nbeam=nbeam, params=params, rinphys=rinphys, lum38=lum38)
     
     # Initialize an array to hold the emitted luminosities for each angle
     lemitv = np.zeros(nang)
@@ -74,27 +67,27 @@ def disktempsave(bdir):
     for ang in range(nang):
         print(f"Processing angle {ang + 1} of {nang}...")
         ij = iang[ang]
-        nlum_copy = np.copy(nlum)
+        nbeam_copy = np.copy(nbeam)
         
         # Rotate the beam to the current angle ij
         if ij != 0 and ij != nphi_beam - 1:
-            nlum_copy[:, :nphi_beam - ij] = nlum[:, ij:]
-            nlum_copy[:, nphi_beam - ij:] = nlum[:, :ij]
+            nbeam_copy[:, :nphi_beam - ij] = nbeam[:, ij:]
+            nbeam_copy[:, nphi_beam - ij:] = nbeam[:, :ij]
         
         # Calculate the illumination based on the rotated beam
-        illum = nlum_copy * lum38
+        illum = nbeam_copy * lum38
 
         # Create a disk and heat it with an isotropic X-ray source
-        xv = np.zeros((npoints, nprofs))
-        yv = np.zeros((npoints, nprofs))
-        zv = np.zeros((npoints, nprofs))
-        T = np.zeros((npoints, nprofs))
-        side = np.zeros((npoints, nprofs), dtype=int)
+        xv = np.zeros((params_data['npoints'], params_data['nprof']))
+        yv = np.zeros((params_data['npoints'], params_data['nprof']))
+        zv = np.zeros((params_data['npoints'], params_data['nprof']))
+        T = np.zeros((params_data['npoints'], params_data['nprof']))
+        side = np.zeros((params_data['npoints'], params_data['nprof']), dtype=int)
         lemit = 0.0
         
         # Calculate the disk temperature and other properties
         side, T, _, labs, lemit = disktemp(params_data['npoints'], params_data['nprof'], rinphys, thbeam, phbeam, illum, 
-                params_data['ph'], xv, yv, zv, T, side, lemit, disk_parameters)
+                params_data['ph'], xv, yv, zv, T, side, lemit, params_data)
         
         print(f"Saving disk temperature profile to dtemp_{ang:03d}.npz...")
         # Save the disk temperature profile and other properties to a file
