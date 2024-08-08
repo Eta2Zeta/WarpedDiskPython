@@ -47,8 +47,9 @@ def disktempsave(bdir):
 
     # Convert beam dictionaries to Beam objects
     beam_objects = [Beam(**beam) for beam in beams]
+
     # Generate the beam shape using the provided parameters
-    thbeam, phbeam, nlum = beam_luminosity(nth_beam, nphi_beam, beam_objects, 0)
+    thbeam, phbeam, nlum = beam_luminosity(nth_beam, nphi_beam, beam_objects, 0, 0)
 
     # plot_beam_3D(nphi_beam, nth_beam, thbeam, phbeam, nlum)
 
@@ -65,24 +66,21 @@ def disktempsave(bdir):
     # Initialize an array to hold the emitted luminosities for each angle
     lemitv = np.zeros(nang)
 
-    print("Calculating step size for angles and creating angle indices...")
-    # Calculate the step size for angles and create an array of indices representing the beam rotation angles
-    istep = nphi_beam / nang
-    iang = (np.arange(nang) * istep).astype(int)
-    
+    print("Calculating disk temperature profiles for each angle...")
+    # Calculate the step size for angles
+    angle_step = 2 * np.pi / nang
+
     # Loop over each angle
     for ang in range(nang):
         print(f"Processing angle {ang + 1} of {nang}...")
-        ij = iang[ang]
-        nlum_copy = np.copy(nlum)
+        rotation_angle = ang * angle_step
         
-        # Rotate the beam to the current angle ij
-        if ij != 0 and ij != nphi_beam - 1:
-            nlum_copy[:, :nphi_beam - ij] = nlum[:, ij:]
-            nlum_copy[:, nphi_beam - ij:] = nlum[:, :ij]
-        
+        # Generate the beam shape with the correct rotation angle
+        thbeam, phbeam, nlum_rotated = beam_luminosity(nth_beam, nphi_beam, beam_objects, 0.1, rotation_angle)
+        # plot_beam_3D(nphi_beam, nth_beam, thbeam, phbeam, nlum_rotated)
+
         # Calculate the illumination based on the rotated beam
-        illum = nlum_copy * lum38
+        illum = nlum_rotated * lum38
 
         # Create a disk and heat it with an isotropic X-ray source
         xv = np.zeros((npoints, nprofs))

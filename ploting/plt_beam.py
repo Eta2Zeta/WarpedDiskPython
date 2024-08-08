@@ -108,33 +108,36 @@ def plot_beam_3D(nth, nphi, vth, vphi, nbeam):
     plt.show()
 
 def main():
-    nth = 70
-    nphi = 70
+    nth = 100
+    nphi = 100
+    
     beam_params = [
-        {'long': 0.0, 'latdeg': 0.0, 'sigmadeg': 18.0, 'thdeg': 30.0, 'norm': 3.0},
-        {'long': 180.0, 'latdeg': 60.0, 'sigmadeg': 12.0, 'thdeg': 0.0, 'norm': 3.0}
+        {'longdeg': 180.0, 'latdeg': 0.0, 'sigma': np.pi/10, 'thdeg': 0.0, 'norm': 3.0}
     ]
     
     # Convert degrees to radians
     for beam in beam_params:
+        beam['long'] = np.radians(beam['longdeg'])
         beam['lat'] = np.radians(beam['latdeg'])
-        beam['sigma'] = np.radians(beam['sigmadeg'])
         beam['th'] = np.radians(beam['thdeg'])
     
     # Remove the degree keys
     for beam in beam_params:
+        del beam['longdeg']
         del beam['latdeg']
-        del beam['sigmadeg']
         del beam['thdeg']
 
     # Create Beam objects
     beams = [Beam(**params) for params in beam_params]
-
-    # Generate the beam
-    vth, vphi, nbeam = beam_luminosity(nth, nphi, beams, floor=0.1)
-
-    # Plot the beam
-    plot_beam_3D(nth, nphi, vth, vphi, nbeam)
+    nang = 10
+    ang_step = 2 * np.pi/nang
+    
+    for ang in range(nang):
+        # Generate the beam
+        angle = ang * ang_step
+        vth, vphi, nbeam = beam_luminosity(nth, nphi, beams, floor=0.1, star_rot_ang=angle)
+        # Plot the beam
+        plot_beam_3D(nth, nphi, vth, vphi, nbeam)
 
 if __name__ == "__main__":
     main()

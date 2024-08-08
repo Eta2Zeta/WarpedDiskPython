@@ -17,25 +17,39 @@ def sphdist(lon1, lat1, lon2, lat2):
 
 class Beam:
     def __init__(self, long, lat, sigma, th, norm):
+        self.original_long = long  # Store the original longitude
         self.long = long
         self.lat = lat
         self.sigma = sigma
         self.th = th
         self.norm = norm
 
-def beam_luminosity(nth, nphi, beams, floor):
+    def reset_longitude(self):
+        self.long = self.original_long  # Reset to the original longitude
+
+    def update_longitude(self, star_rot_ang):
+        self.long = (self.original_long + star_rot_ang) % (2 * np.pi)  # Rotate from the original longitude
+
+
+def beam_luminosity(nth, nphi, beams, floor, star_rot_ang):
     """
     Generate a beam pattern with Gaussian profiles for multiple beams.
     :param nth: Number of theta divisions
     :param nphi: Number of phi divisions
     :param beams: List of Beam objects
     :param floor: Minimum value of the beam pattern
+    :param star_rot_ang: Rotational angle to rotate the whole beam pattern by phi
     :return: Normalized luminosity pattern (nlum), theta (vth), and phi (vphi) coordinates
     """
     
     # Create theta and phi angle vectors
     vth = -np.pi / 2 + np.linspace(0, np.pi, nth)
-    vphi = np.linspace(0, 2 * np.pi, nphi) + 0.0001 * 2 * np.pi
+    vphi = np.linspace(0, 2 * np.pi, nphi)
+
+    # Apply rotation to the beam longitudes
+    for beam in beams:
+        beam.reset_longitude()  # Reset to original longitude before update
+        beam.update_longitude(star_rot_ang)
 
     # Calculate the solid angle covered by each point
     thstep = np.pi / (nth - 1)
