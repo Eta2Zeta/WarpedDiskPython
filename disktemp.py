@@ -1,5 +1,11 @@
 import numpy as np
 from diskshape import diskshape
+from ploting.plt_disk import plot_disk_with_illumination_surface
+
+"""    
+    kpc242 = 9.523  # kpc^2 in 1E42
+    k = 1.3807E-16  # Boltzmann constant in erg/K
+"""
 
 def cross_product(v1, v2):
     """Calculate the cross product of two vectors."""
@@ -11,16 +17,16 @@ def cross_product(v1, v2):
 
 
 
-def disktemp(npoints, nprof, rinphys, thil, phil, illum, ph, xv, yv, zv, T, side, lemit, disk_parameters):
+def disktemp(npoints, nprof, rinphys, thbeam, phbeam, illum, ph, xv, yv, zv, T, side, lemit, disk_parameters):
     """
     Calculate the temperature of the disk given an input radiation field.
     
     :param params: Parameters of the disk
-    :param npoints: Number of points in the disk
-    :param nprof: Number of profile points
+    :param npoints: Number of points in the disk (number of points that constitute the ring, next line)
+    :param nprof: Number of profile points (number of which build up the warped disk)
     :param rinphys: Inner physical radius
-    :param thil: Array of theta illumination
-    :param phil: Array of phi illumination
+    :param thbeam: Array of theta illumination of the beams
+    :param illum: Array of phi illumination of the beams
     :param illum: Illumination array
     :param ph: Phi angles
     :param xv: X-coordinates of the disk
@@ -33,8 +39,6 @@ def disktemp(npoints, nprof, rinphys, thil, phil, illum, ph, xv, yv, zv, T, side
     """
 
     # PHYSICAL CONSTANTS--------
-    kpc242 = 9.523  # kpc^2 in 1E42
-    k = 1.3807E-16  # Boltzmann constant in erg/K
     SBsigma = 5.6705E-5  # Stefan-Boltzmann constant in erg/(cm^2 K^4 s)
     
     # Arrays to store side illumination, temperature, solid angle, and energy absorbed
@@ -49,19 +53,21 @@ def disktemp(npoints, nprof, rinphys, thil, phil, illum, ph, xv, yv, zv, T, side
     phistep = np.full(npoints, ph[1] - ph[0])
 
     # Calculate illumination array elements corresponding to disk points
-    iphi = np.zeros(npoints, dtype=int)
-    ith = np.zeros((npoints, nprof), dtype=int)
-    illum2 = np.zeros((npoints, nprof))
+    disk_illum_phi = np.zeros(npoints, dtype=int)
+    disk_illum_th = np.zeros((npoints, nprof), dtype=int)
+    beam_illum_on_disk = np.zeros((npoints, nprof))
 
     # Map disk points to illumination array indices
     for i in range(npoints):
-        difphi = np.abs(2 * np.pi * ph[i] - phil)
-        iphi[i] = np.argmin(difphi)
+        difphi = np.abs(2 * np.pi * ph[i] - phbeam)
+        disk_illum_phi[i] = np.argmin(difphi)
 
         for j in range(nprof):
-            difth = np.abs(ang[i, j] - thil)
-            ith[i, j] = np.argmin(difth)
-            illum2[i, j] = illum[ith[i, j], iphi[i]]
+            difth = np.abs(ang[i, j] - thbeam)
+            disk_illum_th[i, j] = np.argmin(difth)
+            beam_illum_on_disk[i, j] = illum[disk_illum_th[i, j], disk_illum_phi[i]]
+
+    # plot_disk_with_illumination_surface(xv, yv, zv, beam_illum_on_disk)
 
     # Calculate the temperature profiles for each phi angle
     for i in range(npoints):
@@ -93,7 +99,7 @@ def disktemp(npoints, nprof, rinphys, thil, phil, illum, ph, xv, yv, zv, T, side
 
             # Calculate the temperature if the disk segment is illuminated
             if side[i, j] != 0:
-                labs[i, j] = illum2[i, j] * sang[i, j]
+                labs[i, j] = beam_illum_on_disk[i, j] * sang[i, j]
 
                 # Calculate vectors for the area estimation
                 vec1 = np.array([xv[i, jnds[1]] - xv[i, jnds[0]], yv[i, jnds[1]] - yv[i, jnds[0]], zv[i, jnds[1]] - zv[i, jnds[0]]])

@@ -5,7 +5,7 @@ import matplotlib.cm as cm
 from scipy.constants import k
 from maskit import maskit
 from bbfrac import *
-from ploting.plot import plot1D
+from ploting.plot_general import plot1D
 
 def cross_product(v1, v2):
     """Calculate the cross product of two vectors."""

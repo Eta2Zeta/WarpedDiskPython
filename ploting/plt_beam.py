@@ -112,7 +112,9 @@ def main():
     nphi = 100
     
     beam_params = [
-        {'longdeg': 180.0, 'latdeg': 0.0, 'sigma': np.pi/10, 'thdeg': 0.0, 'norm': 3.0}
+        {'longdeg': 180.0, 'latdeg': 0.0, 'sigma': np.pi/10, 'thdeg': 0.0, 'norm': 3.0},
+        {'longdeg': 90.0, 'latdeg': 90.0, 'sigma': np.pi/10, 'thdeg': 0.0, 'norm': 3.0},
+        {'longdeg': 90.0, 'latdeg': 0.0, 'sigma': np.pi/10, 'thdeg': 0.0, 'norm': 3.0}
     ]
     
     # Convert degrees to radians

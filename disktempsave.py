@@ -23,6 +23,7 @@ def disktempsave(bdir):
     tiltin = params_data['tiltin']
     tiltout = params_data['tiltout']
     phsoff = params_data['phsoff']
+    ph = params_data['ph']
     nphi_beam = params_data['nphi']
     nth_beam = params_data['nth']
     rinphys = params_data['rinphys']
@@ -42,8 +43,6 @@ def disktempsave(bdir):
             beams[idx - 1][param_type] = params_data[key]
 
     print("Generating the beam shape...")
-    # Start timing the beam generation
-    start_time = time.time()
 
     # Convert beam dictionaries to Beam objects
     beam_objects = [Beam(**beam) for beam in beams]
@@ -51,17 +50,11 @@ def disktempsave(bdir):
     # Generate the beam shape using the provided parameters
     thbeam, phbeam, nlum = beam_luminosity(nth_beam, nphi_beam, beam_objects, 0, 0)
 
-    # plot_beam_3D(nphi_beam, nth_beam, thbeam, phbeam, nlum)
-
-    # End timing the beam generation
-    end_time = time.time()
-    print(f"Beam generation took {end_time - start_time:.2f} seconds.")
-
     print("Saving beam parameters to diskbeam.npz...")
     # Save the beam parameters and generated beam shape to a file
     beam_params_path = os.path.join(bdir, 'diskbeam.npz')
     np.savez(beam_params_path, nth=nth_beam, nphi=nphi_beam, beams=beams, thbeam=thbeam, phbeam=phbeam, nlum=nlum, 
-             rinphys=rinphys, lum38=lum38)
+             rinphys=rinphys)
     
     # Initialize an array to hold the emitted luminosities for each angle
     lemitv = np.zeros(nang)
@@ -77,7 +70,6 @@ def disktempsave(bdir):
         
         # Generate the beam shape with the correct rotation angle
         thbeam, phbeam, nlum_rotated = beam_luminosity(nth_beam, nphi_beam, beam_objects, 0.1, rotation_angle)
-        # plot_beam_3D(nphi_beam, nth_beam, thbeam, phbeam, nlum_rotated)
 
         # Calculate the illumination based on the rotated beam
         illum = nlum_rotated * lum38
@@ -92,7 +84,7 @@ def disktempsave(bdir):
         
         # Calculate the disk temperature and other properties
         side, T, _, labs, lemit = disktemp(params_data['npoints'], params_data['nprof'], rinphys, thbeam, phbeam, illum, 
-                params_data['ph'], xv, yv, zv, T, side, lemit, disk_parameters)
+                ph, xv, yv, zv, T, side, lemit, disk_parameters)
         
         print(f"Saving disk temperature profile to dtemp_{ang:03d}.npz...")
         # Save the disk temperature profile and other properties to a file
